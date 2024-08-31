@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Image Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chat-bubble {
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .chat-bubble.user {
+            background-color: #d1ecf1;
+            align-self: flex-end;
+        }
+        .chat-bubble.bot {
+            background-color: #f8d7da;
+            align-self: flex-start;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            margin: auto;
+        }
+        #result-image {
+            max-width: 100%;
+            height: auto;
+        }
+        #loading-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #007bff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+        #tunggu{
+          display: none;
+        }
+        .bot{
+          width: 100%;
+          position: absolute;
+          bottom: 5px;
+          text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="loading-bar"></div>
+          <div class="alert alert-success" id="tunggu">Wait, we are processing your request...</div>
+         <div class="input-group mt-3">
+            <input type="text" class="form-control" id="user-input" placeholder="Enter your prompt...">
+            <div class="input-group-append">
+                <button class="btn btn-primary" id="generate-button">Generate Image</button>
+            </div>
+        </div><br>
+        <div class="chat-container border p-3" id="chat-container">
+            <!-- Chat bubbles will appear here -->
+        </div>
+    </div>
+    <div class="bot">
+      <p>&copy; 2024 HawilProject. All rights reserved. <br>Api by : ryzendesu</p>
+    </div>
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('generate-button').addEventListener('click', function() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput) {
+                // Display user input as chat bubble
+                const userBubble = document.createElement('div');
+                userBubble.className = 'chat-bubble user';
+                userBubble.textContent = userInput;
+                document.getElementById('chat-container').appendChild(userBubble);
+
+                // Clear input field
+                document.getElementById('user-input').value = '';
+
+                // Show loading bar
+                document.getElementById('loading-bar').style.display = 'block';
+                document.getElementById('tunggu').style.display='block'
+
+                // Call API to generate image
+                generateImage(userInput);
+            }
+        });
+
+        function generateImage(prompt) {
+            fetch(`https://api.ryzendesu.vip/api/ai/flux-schnell?prompt=${encodeURIComponent(prompt)}`, {
+                method: 'GET'
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                if (blob.type.startsWith('image/')) {
+                    // Hide loading bar
+                    document.getElementById('loading-bar').style.display = 'none';
+                    document.getElementById('tunggu').style.display='none'
+
+                    // Create image URL from blob
+                    const imageUrl = URL.createObjectURL(blob);
+
+                    // Display image as bot response
+                    const botBubble = document.createElement('div');
+                    botBubble.className = 'chat-bubble bot';
+
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.id = 'result-image';
+
+                    botBubble.appendChild(img);
+                    document.getElementById('chat-container').appendChild(botBubble);
+                } else {
+                    throw new Error('Received a non-image response');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating image. Please try again.');
+                // Hide loading bar
+                document.getElementById('tunggu').style.display='none'
+                document.getElementById('loading-bar').style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
