@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Text to Image</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+            background-repeat: no-repeat;
+            background-size: auto 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 30px 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            text-align: center;
+            position: relative;
+            animation: slideIn 1s ease-out forwards;
+        }
+
+        .loading {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background-color: #5c6bc0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loadingAnimation 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes loadingAnimation {
+            0% {
+                width: 0;
+            }
+
+            50% {
+                width: 100%;
+            }
+
+            100% {
+                width: 0;
+            }
+        }
+
+        button {
+            width: 100%;
+            border-radius: 30px;
+            height: 45px;
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(92, 107, 192, 0.4);
+        }
+
+        button:hover {
+            background-color: #3949ab;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(92, 107, 192, 0.6);
+        }
+
+        input {
+            border-radius: 30px;
+            height: 45px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #5c6bc0;
+            outline: none;
+            box-shadow: 0 0 10px rgba(92, 107, 192, 0.2);
+        }
+
+        #image-result {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .bot{
+          width: 100%;
+          position: fixed;
+          bottom: 10px;
+          text-align: center;
+        }
+        .progress{
+          height: 5px;
+        }
+        .alert{
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Loading Bar -->
+    <div class="loading" id="loading-bar"></div>
+    <div class="alert alert-info shadow animate__animate animate__shakeX" id="alertinfo">"Let’s bring your imagination to life at Hawil Project, the image generator
+    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="100" aria-valuemin="100%" aria-valuemax="100">
+  <div class="progress-bar" style="width: 100%"></div>
+</div>
+</div>
+    <!-- Generate Image Form -->
+    <div style="margin-left:10px;">
+      Hallo!! <br>Ayo <strong id="someone">Someone </strong>, coba generate foto dari text
+    </div>
+    <div class="container">
+        <h3 class="mb-4">Generate Image from Text</h3>
+        <input type="text" id="prompt-input" class="form-control" placeholder="Enter your prompt here..." required>
+        <button id="generate-button" class="btn btn-primary">Generate Image</button>
+
+        <!-- Image Display -->
+        <div id="image-result" class="mt-4">
+            <h5>Generated Image:</h5>
+            <img id="generated-image" src="" alt="Generated Image" class="img-fluid mt-3 rounded shadow">
+        </div>
+    </div>
+    
+    <div class="bot">created by : <strong>HawilProject</strong> 2024</div>
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    const nama = localStorage.getItem('nama');
+    someone.innerHTML=nama;
+    if(nama === 'undefined'){
+      window.location.href='login.html'
+    }
+    // Function to decrement progress
+        function decrementProgress() {
+            let progressBar = document.querySelector('.progress-bar');
+            let width = 100; // Start at 100%
+            const duration = 2000; // 5 seconds
+            const interval = 20; // Update every 50ms
+            const decrementPerInterval = (width / (duration / interval)); // Calculate decrement per interval
+
+            let timer = setInterval(function() {
+                if (width <= 0) {
+                    clearInterval(timer);
+                    alertinfo.style.display='none';
+                } else {
+                    width -= decrementPerInterval;
+                    progressBar.style.width = Math.max(width, 0) + '%'; // Ensure width doesn't go below 0%
+                    progressBar.setAttribute('aria-valuenow', Math.max(width, 0));
+                }
+            }, interval);
+        }
+
+        // Start the decrementing progress when the page loads
+        document.addEventListener('DOMContentLoaded', decrementProgress);
+        
+    
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('generate-button').addEventListener('click', function () {
+                const prompt = document.getElementById('prompt-input').value.trim();
+
+                if (!prompt) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Oops...',
+                        text: 'Please enter a prompt to generate an image!'
+                    });
+                    return;
+                }
+
+                // Menampilkan loading bar
+                document.getElementById('loading-bar').style.display = 'block';
+
+                // Mengirim request ke API
+                fetch('https://api.ryzendesu.vip/api/ai/flux-schnell?prompt=' + encodeURIComponent(prompt))
+                    .then(response => response.blob()) // Mengambil respons sebagai Blob (untuk image)
+                    .then(imageBlob => {
+                        document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+                        const imageUrl = URL.createObjectURL(imageBlob);
+                        document.getElementById('generated-image').src = imageUrl;
+                        document.getElementById('image-result').style.display = 'block'; // Tampilkan hasil gambar
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Failed to generate image. Please try again later.'
+                        });
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>
