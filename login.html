@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Sign Up</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #e0c3fc, #8ec5fc);
+            background-repeat: no-repeat;
+            background-size: auto 100vh;
+            font-family: 'Arial', sans-serif;
+            padding: 10px;
+        }
+        .container-form {
+            max-width: 400px;
+            margin: auto;
+            padding: 30px 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        input {
+            border-radius: 30px;
+            height: 45px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            width: 100%;
+        }
+        button {
+            width: 100%;
+            border-radius: 30px;
+            height: 45px;
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3949ab;
+        }
+        .loading {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background-color: #5c6bc0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loadingAnimation 2s infinite;
+        }
+        @keyframes loadingAnimation {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 0; }
+        }
+    </style>
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Bar -->
+    <div class="loading" id="loading-bar"></div>
+
+    <!-- Login Form -->
+    <div class="container-form" id="login-form">
+        <h3>Login</h3>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="login-button">Login</button>
+        <p class="text-center mt-3">Don't have an account? <a href="#" id="signup-link">Sign up</a></p>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div class="container-form" id="signup-form" style="display:none;">
+        <h3>Sign Up</h3>
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="text" id="signup-nama" placeholder="Nama" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <button id="signup-button">Sign Up</button>
+        <p class="text-center mt-3"><a href="#" id="back-to-login">Back to Login</a></p>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menambahkan event listener untuk tombol login
+            document.getElementById('login-button').addEventListener('click', function() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (email === '' || password === '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please fill in all fields!'
+        });
+        return;
+    }
+
+    // Menampilkan loading bar
+    document.getElementById('loading-bar').style.display = 'block';
+
+    fetch('https://apigame-18b26-default-rtdb.firebaseio.com/areauser.json')
+        .then(response => response.json())
+        .then(data => {
+            let validUser = false;
+            let userName = '';
+            let emailUser = ''
+            for (let key in data) {
+                const user = data[key];
+                if (user.email === email && user.password === password) {
+                    validUser = true;
+                    userName = user.nama;
+                    emailUser = user.email
+                    break;
+                }
+            }
+            document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+            if (validUser) {
+                localStorage.setItem('nama', userName);
+                localStorage.setItem('email', emailUser);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login successful!',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.href = 'akun.html'; // Arahkan ke halaman lain
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Invalid email or password!'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        });
+});
+                        
+
+            // Menampilkan formulir Sign Up
+            document.getElementById('signup-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('signup-form').style.display = 'block';
+            });
+
+            // Kembali ke formulir Login
+            document.getElementById('back-to-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            });
+
+            // Event listener untuk tombol Sign Up
+            document.getElementById('signup-button').addEventListener('click', function() {
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const nama = document.getElementById('signup-nama').value;
+
+                // Menampilkan loading bar
+                document.getElementById('loading-bar').style.display = 'block';
+
+                const newUser = {
+                    nama: nama,
+                    email: email,
+                    password: password
+                };
+
+                fetch('https://apigame-18b26-default-rtdb.firebaseio.com/areauser.json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newUser)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sign Up successful!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        document.getElementById('signup-form').style.display = 'none';
+                        document.getElementById('login-form').style.display = 'block';
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('loading-bar').style.display = 'none'; // Sembunyikan loading bar
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Failed to sign up!'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
